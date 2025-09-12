@@ -12,7 +12,7 @@ app.get("/", (req: Request, res: Response) => {
      res.status(200).json({ message: "Student Management API — up" });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 const start = async (): Promise<void> => {
      await connectDB();
