@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Student Management System</title>
+</head>
+<link rel="stylesheet" href="../styles/home.css">
+
+<body>
+     <div class="container">
+          <div class="header">
+               <h1>Student Management System</h1>
+          </div>
+
+          <div class="actions">
+               <button class="btn btn-primary" id="addStudentBtn">+ Add New Student</button>
+               <div class="search-container">
+                    <input type="text" class="search-input" placeholder="Search students...">
+                    <button class="btn">Search</button>
+               </div>
+          </div>
+
+          <div class="table-container">
+               <table>
+                    <thead>
+                         <tr>
+                              <th>Student ID</th>
+                              <th>First Name</th>
+                              <th>Last Name</th>
+                              <th>Email</th>
+                              <th>Phone</th>
+                              <th>Course</th>
+                              <th>Year</th>
+                              <th>Actions</th>
+                         </tr>
+                    </thead>
+                    <tbody>
+                         <% if (students.length> 0) { %>
+                              <% students.forEach(student=> { %>
+                                   <tr data-id="<%= student._id %>">
+                                        <td>
+                                             <%= student.studentId %>
+                                        </td>
+                                        <td>
+                                             <%= student.firstName %>
+                                        </td>
+                                        <td>
+                                             <%= student.lastName %>
+                                        </td>
+                                        <td>
+                                             <%= student.email %>
+                                        </td>
+                                        <td>
+                                             <%= student.phone %>
+                                        </td>
+                                        <td>
+                                             <%= student.course %>
+                                        </td>
+                                        <td>
+                                             <%= student.year %>
+                                        </td>
+                                        <td>
+                                             <div class="action-buttons">
+                                                  <button class="btn btn-small btn-edit">Edit</button>
+                                                  <button class="btn btn-small btn-delete">Delete</button>
+                                             </div>
+                                        </td>
+                                   </tr>
+                                   <% }) %>
+                                        <% } else { %>
+                                             <tr>
+                                                  <td colspan="8" class="no-data">No students found</td>
+                                             </tr>
+                                             <% } %>
+                    </tbody>
+               </table>
+          </div>
+
+          <div class="pagination">
+               <button class="page-btn">Previous</button>
+               <button class="page-btn active">1</button>
+               <button class="page-btn">2</button>
+               <button class="page-btn">3</button>
+               <button class="page-btn">Next</button>
+          </div>
+     </div>
+
+     <div class="modal" id="studentModal">
+          <div class="modal-content">
+               <div class="modal-header">
+                    <h2 class="modal-title">Add New Student</h2>
+                    <span class="close">&times;</span>
+               </div>
+               <form id="studentForm">
+                    <input type="hidden" id="studentId" name="studentId">
+                    <div class="form-group">
+                         <label class="form-label">Student ID</label>
+                         <input type="text" class="form-input" id="student_Id_input" name="studentId"
+                              placeholder="Enter student ID" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">First Name</label>
+                         <input type="text" class="form-input" id="firstName_input" name="firstName"
+                              placeholder="Enter first name" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">Last Name</label>
+                         <input type="text" class="form-input" id="lastName_input" name="lastName"
+                              placeholder="Enter last name" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">Email</label>
+                         <input type="email" class="form-input" id="email_input" name="email"
+                              placeholder="Enter email address" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">Phone</label>
+                         <input type="tel" class="form-input" id="phone_input" name="phone"
+                              placeholder="Enter phone number" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">Course</label>
+                         <input type="text" class="form-input" id="course_input" name="course"
+                              placeholder="Enter course" required>
+                    </div>
+                    <div class="form-group">
+                         <label class="form-label">Year</label>
+                         <input type="number" class="form-input" id="year_input" name="year"
+                              placeholder="Enter year level" min="1" max="4" required>
+                    </div>
+                    <div class="form-actions">
+                         <button type="button" class="btn" id="cancelBtn">Cancel</button>
+                         <button type="submit" class="btn btn-primary" id="saveStudentBtn">Save Student</button>
+                    </div>
+               </form>
+          </div>
+     </div>
+
+
+     <script src="/js/home.js"></script>
+</body>
+
+</html>
