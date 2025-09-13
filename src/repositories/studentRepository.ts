@@ -7,6 +7,8 @@ export interface IStudentRepository {
   findById(id: string): Promise<IStudentDocument | null>;
   update(id: string, data: UpdateStudentDTO): Promise<IStudentDocument | null>;
   delete(id: string): Promise<IStudentDocument | null>;
+
+  search(query: string): Promise<IStudentDocument[]>;
 }
 
 export class StudentRepository implements IStudentRepository {
@@ -28,5 +30,18 @@ export class StudentRepository implements IStudentRepository {
 
   async delete(id: string): Promise<IStudentDocument | null> {
     return await StudentModel.findByIdAndDelete(id);
+  }
+
+
+  async search(query: string): Promise<IStudentDocument[]> {
+    const regex = new RegExp(query, 'i'); // Case-insensitive regex
+    return await StudentModel.find({
+      $or: [
+        { studentId: { $regex: regex } },
+        { firstName: { $regex: regex } },
+        { lastName: { $regex: regex } },
+        
+      ]
+    });
   }
 }

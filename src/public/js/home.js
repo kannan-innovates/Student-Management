@@ -1,15 +1,19 @@
+// public/js/main.js
+
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('studentModal');
     const form = document.getElementById('studentForm');
     const modalTitle = document.querySelector('.modal-title');
     const studentTableBody = document.querySelector('tbody');
+    const searchInput = document.querySelector('.search-input');
+    const searchButton = document.querySelector('.search-container .btn');
 
     // Handle modal show/hide
     document.getElementById('addStudentBtn').addEventListener('click', () => {
         modalTitle.textContent = "Add New Student";
-        form.reset(); // Clear the form
-        form.dataset.mode = "create"; // Set form mode to 'create'
-        form.dataset.studentId = ""; // Clear any existing student ID
+        form.reset();
+        form.dataset.mode = "create";
+        form.dataset.studentId = "";
         modal.style.display = 'block';
     });
 
@@ -56,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(error.error || "Something went wrong.");
             }
 
-            // After a successful operation, refresh the table and close the modal
             await refreshStudentTable();
             modal.style.display = 'none';
             alert(`Student ${mode === 'create' ? 'added' : 'updated'} successfully!`);
@@ -87,7 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 const student = await response.json();
 
-                // Populate form fields with student data
                 document.getElementById('student_Id_input').value = student.studentId;
                 document.getElementById('firstName_input').value = student.firstName;
                 document.getElementById('lastName_input').value = student.lastName;
@@ -128,19 +130,48 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // NEW SEARCH FUNCTIONALITY
+    searchButton.addEventListener('click', () => {
+        const query = searchInput.value;
+        if (query.trim() !== '') {
+            refreshStudentTable(query);
+        } else {
+            // If search box is empty, show all students
+            refreshStudentTable();
+        }
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            searchButton.click();
+        }
+    });
+    // Clear search functionality
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+        searchInput.value = '';
+        refreshStudentTable();
+    });
+
     // Function to refresh the student table
-    async function refreshStudentTable() {
+    async function refreshStudentTable(query = '') {
         try {
-            const response = await fetch('/api/students');
+            const url = query ? `/api/students/search?q=${encodeURIComponent(query)}` : '/api/students';
+            const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Failed to fetch students.");
             }
             const students = await response.json();
 
-            // Clear existing table rows
             studentTableBody.innerHTML = '';
 
-            // Populate the table with new data
+            if (students.length === 0) {
+                const noDataRow = document.createElement('tr');
+                noDataRow.innerHTML = `<td colspan="8" style="text-align:center;">No students found.</td>`;
+                studentTableBody.appendChild(noDataRow);
+                return;
+            }
+
             students.forEach(student => {
                 const row = document.createElement('tr');
                 row.dataset.id = student._id;
@@ -165,4 +196,5 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error('Error refreshing table:', error);
         }
     }
+    refreshStudentTable();
 });

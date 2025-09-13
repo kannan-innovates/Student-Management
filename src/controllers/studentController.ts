@@ -51,4 +51,17 @@ export class StudentController {
                res.status(400).json({ error: err.message });
           }
      };
+     
+     searchStudents = async (req: Request, res: Response) => {
+          const query = req.query.q as string;
+          if (!query) {
+               return res.status(400).json({ error: "Search query 'q' is required." });
+          }
+          try {
+               const students = await this.service.searchStudents(query);
+               res.status(200).json(students);
+          } catch (err: any) {
+               res.status(500).json({ error: err.message });
+          }
+     };
 }

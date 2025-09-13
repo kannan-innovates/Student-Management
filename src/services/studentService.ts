@@ -32,4 +32,8 @@ export class StudentService {
     if (!deleted) throw new Error("Student not found or delete failed");
     return deleted;
   }
+
+  async searchStudents(query: string) {
+    return await this.repository.search(query);
+  }
 }
