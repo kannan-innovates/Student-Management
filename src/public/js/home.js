@@ -94,11 +94,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
             await refreshStudentTable();
             modal.style.display = 'none';
-            alert(`Student ${mode === 'create' ? 'added' : 'updated'} successfully!`);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: `Student ${mode === 'create' ? 'added' : 'updated'} successfully!`,
+                timer: 2000,
+                showConfirmButton: false
+            });
 
         } catch (error) {
             console.error('Operation failed:', error);
-            alert(`Error: ${error.message}`);
+            Swal.fire({
+                icon: 'error',
+                title: 'Operation Failed',
+                text: error.message,
+            });
         }
     });
 
@@ -135,31 +146,72 @@ document.addEventListener('DOMContentLoaded', function () {
 
             } catch (error) {
                 console.error('Failed to fetch student for edit:', error);
-                alert(`Error: ${error.message}`);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                });
+            }
+        }
+
+        // DELETE button logic
+        if (e.target.classList.contains('btn-edit')) {
+            // ... (keep existing edit logic)
+            try {
+                // ... (fetch logic for editing)
+            } catch (error) {
+                console.error('Failed to fetch student for edit:', error);
+                // ✨ CHANGED: Replaced alert() with Swal.fire() for errors
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                });
             }
         }
 
         // DELETE button logic
         if (e.target.classList.contains('btn-delete')) {
-            if (confirm("Are you sure you want to delete this student?")) {
-                try {
-                    const response = await fetch(`/api/students/${studentId}`, {
-                        method: 'DELETE',
-                    });
 
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || "Failed to delete student.");
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/api/students/${studentId}`, {
+                            method: 'DELETE',
+                        });
+
+                        if (!response.ok) {
+                            const error = await response.json();
+                            throw new Error(error.error || "Failed to delete student.");
+                        }
+
+                        await refreshStudentTable();
+
+                        Swal.fire(
+                            'Deleted!',
+                            'The student has been deleted.',
+                            'success'
+                        );
+
+                    } catch (error) {
+                        console.error('Failed to delete student:', error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Deletion Failed',
+                            text: error.message,
+                        });
                     }
-
-                    await refreshStudentTable();
-                    alert("Student deleted successfully!");
-
-                } catch (error) {
-                    console.error('Failed to delete student:', error);
-                    alert(`Error: ${error.message}`);
                 }
-            }
+            });
         }
     });
 
