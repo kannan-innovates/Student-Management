@@ -1,14 +1,16 @@
+// repositories/studentRepository.ts
+
 import StudentModel, { IStudentDocument, IStudent } from "../models/Student";
 import { CreateStudentDTO, UpdateStudentDTO } from "../types/student";
 
 export interface IStudentRepository {
   create(data: CreateStudentDTO): Promise<IStudentDocument>;
-  findAll(): Promise<IStudentDocument[]>;
+  findAll(page: number, limit: number): Promise<IStudentDocument[]>;
   findById(id: string): Promise<IStudentDocument | null>;
   update(id: string, data: UpdateStudentDTO): Promise<IStudentDocument | null>;
   delete(id: string): Promise<IStudentDocument | null>;
-
-  search(query: string): Promise<IStudentDocument[]>;
+  search(query: string, page: number, limit: number): Promise<IStudentDocument[]>;
+  countStudents(query?: string): Promise<number>;
 }
 
 export class StudentRepository implements IStudentRepository {
@@ -16,8 +18,9 @@ export class StudentRepository implements IStudentRepository {
     return await StudentModel.create(data);
   }
 
-  async findAll(): Promise<IStudentDocument[]> {
-    return await StudentModel.find();
+  async findAll(page: number, limit: number): Promise<IStudentDocument[]> {
+    const skip = (page - 1) * limit;
+    return await StudentModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit);
   }
 
   async findById(id: string): Promise<IStudentDocument | null> {
@@ -32,16 +35,29 @@ export class StudentRepository implements IStudentRepository {
     return await StudentModel.findByIdAndDelete(id);
   }
 
-
-  async search(query: string): Promise<IStudentDocument[]> {
-    const regex = new RegExp(query, 'i'); // Case-insensitive regex
+  async search(query: string, page: number, limit: number): Promise<IStudentDocument[]> {
+    const regex = new RegExp(query, 'i');
+    const skip = (page - 1) * limit;
     return await StudentModel.find({
       $or: [
         { studentId: { $regex: regex } },
         { firstName: { $regex: regex } },
-        { lastName: { $regex: regex } },
-        
+        { lastName: { $regex: regex } }
       ]
-    });
+    }).skip(skip).limit(limit);
+  }
+
+  async countStudents(query?: string): Promise<number> {
+    if (query) {
+      const regex = new RegExp(query, 'i');
+      return await StudentModel.countDocuments({
+        $or: [
+          { studentId: { $regex: regex } },
+          { firstName: { $regex: regex } },
+          { lastName: { $regex: regex } }
+        ]
+      });
+    }
+    return await StudentModel.countDocuments();
   }
 }

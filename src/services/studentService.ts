@@ -11,8 +11,8 @@ export class StudentService {
     return await this.repository.create(data);
   }
 
-  async getAllStudents() {
-    return await this.repository.findAll();
+  async getAllStudents(page: number, limit: number) {
+    return await this.repository.findAll(page, limit);
   }
 
   async getStudentById(id: string) {
@@ -33,7 +33,11 @@ export class StudentService {
     return deleted;
   }
 
-  async searchStudents(query: string) {
-    return await this.repository.search(query);
+  async searchStudents(query: string, page: number, limit: number) {
+    return await this.repository.search(query, page, limit);
+  }
+
+  async getStudentCount(query?: string) {
+    return await this.repository.countStudents(query);
   }
 }

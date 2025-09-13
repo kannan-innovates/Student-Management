@@ -1,5 +1,3 @@
-// public/js/main.js
-
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('studentModal');
     const form = document.getElementById('studentForm');
@@ -7,6 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const studentTableBody = document.querySelector('tbody');
     const searchInput = document.querySelector('.search-input');
     const searchButton = document.querySelector('.search-container .btn');
+    const paginationContainer = document.querySelector('.pagination');
+
+
+    let currentPage = 1;
+    let currentSearchQuery = '';
+    const studentsPerPage = 5;
 
     // Handle modal show/hide
     document.getElementById('addStudentBtn').addEventListener('click', () => {
@@ -130,15 +134,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // NEW SEARCH FUNCTIONALITY
+    // SEARCH FUNCTIONALITY
     searchButton.addEventListener('click', () => {
-        const query = searchInput.value;
-        if (query.trim() !== '') {
-            refreshStudentTable(query);
-        } else {
-            // If search box is empty, show all students
-            refreshStudentTable();
-        }
+        const query = searchInput.value.trim();
+        currentSearchQuery = query;
+        currentPage = 1;
+        refreshStudentTable(currentPage, currentSearchQuery);
     });
 
     searchInput.addEventListener('keypress', (e) => {
@@ -147,35 +148,50 @@ document.addEventListener('DOMContentLoaded', function () {
             searchButton.click();
         }
     });
+
     // Clear search functionality
     document.getElementById('clearSearchBtn').addEventListener('click', () => {
         searchInput.value = '';
         refreshStudentTable();
     });
 
+    // Handle pagination button clicks
+    paginationContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('page-btn') && !e.target.classList.contains('active')) {
+            const newPage = parseInt(e.target.dataset.page);
+            if (!isNaN(newPage)) {
+                currentPage = newPage;
+                refreshStudentTable(currentPage, currentSearchQuery);
+            }
+        }
+    });
     // Function to refresh the student table
-    async function refreshStudentTable(query = '') {
+    async function refreshStudentTable(page = 1, query = '') {
         try {
-            const url = query ? `/api/students/search?q=${encodeURIComponent(query)}` : '/api/students';
+            const url = query
+                ? `/api/students/search?q=${encodeURIComponent(query)}&page=${page}&limit=${studentsPerPage}`
+                : `/api/students?page=${page}&limit=${studentsPerPage}`;
+
             const response = await fetch(url);
             if (!response.ok) {
                 throw new Error("Failed to fetch students.");
             }
-            const students = await response.json();
+            const data = await response.json();
+            const { students, totalPages } = data;
 
+            // Clear existing table rows
             studentTableBody.innerHTML = '';
 
             if (students.length === 0) {
                 const noDataRow = document.createElement('tr');
                 noDataRow.innerHTML = `<td colspan="8" style="text-align:center;">No students found.</td>`;
                 studentTableBody.appendChild(noDataRow);
-                return;
-            }
-
-            students.forEach(student => {
-                const row = document.createElement('tr');
-                row.dataset.id = student._id;
-                row.innerHTML = `
+            } else {
+                // Populate the table with new data
+                students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.dataset.id = student._id;
+                    row.innerHTML = `
                     <td>${student.studentId}</td>
                     <td>${student.firstName}</td>
                     <td>${student.lastName}</td>
@@ -190,11 +206,46 @@ document.addEventListener('DOMContentLoaded', function () {
                         </div>
                     </td>
                 `;
-                studentTableBody.appendChild(row);
-            });
+                    studentTableBody.appendChild(row);
+                });
+            }
+
+            renderPagination(totalPages, page);
+
         } catch (error) {
             console.error('Error refreshing table:', error);
         }
     }
-    refreshStudentTable();
+
+    function renderPagination(totalPages, currentPage) {
+        paginationContainer.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const createButton = (text, page) => {
+            const button = document.createElement('button');
+            button.className = 'page-btn';
+            button.textContent = text;
+            button.dataset.page = page;
+            if (page === currentPage) {
+                button.classList.add('active');
+            }
+            return button;
+        };
+
+        if (currentPage > 1) {
+            paginationContainer.appendChild(createButton('Previous', currentPage - 1));
+        }
+
+        for (let i = 1; i <= totalPages; i++) {
+            paginationContainer.appendChild(createButton(i, i));
+        }
+
+        if (currentPage < totalPages) {
+            paginationContainer.appendChild(createButton('Next', currentPage + 1));
+        }
+    }
+
+    // Initial load
+    refreshStudentTable(currentPage, currentSearchQuery);
+
 });

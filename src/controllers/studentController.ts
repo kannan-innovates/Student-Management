@@ -15,10 +15,18 @@ export class StudentController {
           }
      };
 
-     getAllStudents = async (_req: Request, res: Response) => {
+     getAllStudents = async (req: Request, res: Response) => {
           try {
-               const students = await this.service.getAllStudents();
-               res.status(200).json(students);
+               const page = parseInt(req.query.page as string) || 1;
+               const limit = parseInt(req.query.limit as string) || 5;
+               const students = await this.service.getAllStudents(page, limit);
+               const totalStudents = await this.service.getStudentCount();
+               res.status(200).json({
+                    students,
+                    totalStudents,
+                    totalPages: Math.ceil(totalStudents / limit),
+                    currentPage: page
+               });
           } catch (err: any) {
                res.status(500).json({ error: err.message });
           }
@@ -51,17 +59,28 @@ export class StudentController {
                res.status(400).json({ error: err.message });
           }
      };
-     
+
      searchStudents = async (req: Request, res: Response) => {
           const query = req.query.q as string;
+          const page = parseInt(req.query.page as string) || 1;
+          const limit = parseInt(req.query.limit as string) || 5;
+
           if (!query) {
-               return res.status(400).json({ error: "Search query 'q' is required." });
+               return this.getAllStudents(req, res);
           }
+
           try {
-               const students = await this.service.searchStudents(query);
-               res.status(200).json(students);
+               const students = await this.service.searchStudents(query, page, limit);
+               const totalStudents = await this.service.getStudentCount(query);
+               res.status(200).json({
+                    students,
+                    totalStudents,
+                    totalPages: Math.ceil(totalStudents / limit),
+                    currentPage: page
+               });
           } catch (err: any) {
                res.status(500).json({ error: err.message });
           }
      };
 }
+
