@@ -2,6 +2,7 @@ import { Router } from "express";
 import { StudentController } from "../controllers/studentController";
 import { StudentService } from "../services/studentService";
 import { StudentRepository } from "../repositories/studentRepository";
+import { studentValidationRules, validate } from "../middlewares/studentValidator";
 
 // Create repository → service → controller 
 const repository = new StudentRepository();
@@ -16,10 +17,10 @@ router.get("/students/search", controller.searchStudents);
 
 
 // Student CRUD routes
-router.post("/students", controller.createStudent);
+router.post("/students", studentValidationRules(), validate, controller.createStudent);
 router.get("/students", controller.getAllStudents);
 router.get("/students/:id", controller.getStudentById);
-router.put("/students/:id", controller.updateStudent);
+router.put("/students/:id", studentValidationRules(), validate, controller.updateStudent);
 router.delete("/students/:id", controller.deleteStudent);
 
 

@@ -299,6 +299,17 @@ tr:hover {
      font-weight: 600;
 }
 
+.error-message {
+    color: #d9534f;
+    font-size: 0.8em;
+    height: 1em; 
+    margin-top: 4px;
+}
+
+.form-input.is-invalid {
+    border-color: #d9534f; 
+}
+
 @media (max-width: 768px) {
      .actions {
           flex-direction: column;

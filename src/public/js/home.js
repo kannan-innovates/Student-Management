@@ -1,12 +1,31 @@
 document.addEventListener('DOMContentLoaded', function () {
     const modal = document.getElementById('studentModal');
-    const form = document.getElementById('studentForm');
     const modalTitle = document.querySelector('.modal-title');
     const studentTableBody = document.querySelector('tbody');
     const searchInput = document.querySelector('.search-input');
     const searchButton = document.querySelector('.search-container .btn');
     const paginationContainer = document.querySelector('.pagination');
+    const form = document.getElementById('studentForm');
 
+    // Helper function to clear all previous error messages
+    function clearFormErrors() {
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        document.querySelectorAll('.form-input').forEach(el => el.classList.remove('is-invalid'));
+    }
+
+    // Helper function to display errors from the server
+    function displayFormErrors(errors) {
+        for (const field in errors) {
+            const errorElement = document.getElementById(`${field}-error`);
+            const inputElement = document.querySelector(`[name="${field}"]`);
+            if (errorElement) {
+                errorElement.textContent = errors[field];
+            }
+            if (inputElement) {
+                inputElement.classList.add('is-invalid');
+            }
+        }
+    }
 
     let currentPage = 1;
     let currentSearchQuery = '';
@@ -38,6 +57,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Handle form submission (Create & Update)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        clearFormErrors(); // Clear previous errors on new submission
+
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
         const studentId = form.dataset.studentId;
@@ -59,9 +80,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
 
+            const responseData = await response.json();
+
+            // NEW: Check for validation errors (status 422)
+            if (response.status === 422) {
+                displayFormErrors(responseData.errors);
+                return; // Stop execution
+            }
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || "Something went wrong.");
+                throw new Error(responseData.error || "Something went wrong.");
             }
 
             await refreshStudentTable();
@@ -73,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
             alert(`Error: ${error.message}`);
         }
     });
+
 
     // Handle Edit and Delete button clicks (Event delegation)
     studentTableBody.addEventListener('click', async (e) => {

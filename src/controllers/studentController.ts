@@ -47,7 +47,10 @@ export class StudentController {
                const updated = await this.service.updateStudent(req.params.id, data);
                res.status(200).json(updated);
           } catch (err: any) {
-               res.status(400).json({ error: err.message });
+               if (err.message.includes("not found")) {
+                    return res.status(404).json({ error: err.message });
+               }
+               res.status(500).json({ error: err.message });
           }
      };
 
