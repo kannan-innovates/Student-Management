@@ -24,19 +24,18 @@ const studentRepository = new StudentRepository();
 const studentService = new StudentService(studentRepository);
 const studentController = new StudentController(studentService);
 
-// ---------------------------
-// NEW ROUTE FOR THE EJS VIEW
-// ---------------------------
+
 app.get("/", async (req: Request, res: Response) => {
   try {
-    const students = await studentService.getAllStudents();
+    const page = 1; 
+    const limit = 5; 
+    const students = await studentService.getAllStudents(page,limit);
     res.render("home", { students });
   } catch (error) {
     console.error("Failed to fetch students for home page:", error);
     res.status(500).send("An error occurred while loading the page.");
   }
 });
-// ---------------------------
 
 app.use("/api", studentRoutes);
 
