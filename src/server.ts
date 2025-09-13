@@ -1,27 +1,25 @@
-import express, { Application, Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db";
+import studentRoutes from "./routes/studentRoutes";
 
 dotenv.config();
-
-const app: Application = express();
+const app = express();
 app.use(express.json());
 
-// simple health route
-app.get("/", (req: Request, res: Response) => {
-     res.status(200).json({ message: "Student Management API — up" });
-});
 
-const PORT = process.env.PORT || 3000;
+app.use("/", studentRoutes);
 
-const start = async (): Promise<void> => {
+const PORT = process.env.PORT || 5000;
+
+const startServer = async () => {
      await connectDB();
      app.listen(PORT, () => {
-          console.log(`Server listening on port ${PORT}`);
+          console.log(`Server running on port ${PORT}`);
      });
 };
 
-start().catch((err) => {
-     console.error("Failed to start:", err);
+startServer().catch((err) => {
+     console.error("Server failed to start:", err);
      process.exit(1);
 });
