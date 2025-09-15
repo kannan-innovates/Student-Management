@@ -63,18 +63,15 @@ Follow these instructions to get a copy of the project up and running on your lo
 ### Installation & Setup
 
 1. **Clone the repository:**
-
 ```bash
 git clone https://github.com/kannan-innovates/Student-Management.git
 
 
 2. Navigate to the project directory:
-
 ```bash
 cd Student-Management
 
 3.	Install dependencies:
-
 ```bash
 npm install
 
@@ -83,19 +80,19 @@ npm install
 Create a file named .env in the root of the project and add the following:
 
 # .env
-
 # Your MongoDB connection string
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/yourDatabaseName?retryWrites=true&w=majority
-
 # The port the server will run on
 PORT=5000
 
 5.	Run the application:
-For development (with hot-reloading):
 
+For development (with hot-reloading):
+```bash
 npm run dev
 
 The server will start on http://localhost:5000.
+
 For production:
 
 ```bash
